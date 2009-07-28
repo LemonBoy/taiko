@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <malloc.h>
 #include <string.h>
 #include <gccore.h>
@@ -73,6 +74,9 @@ int __findMainContent()
 	char contentPath[ISFS_MAXPATH];
 	int x, titleContents, titleBootContent;
 	u32 tmdSize;
+	
+	if (ES_GetTitleID(&titleId) < 0)
+		__rebootWii();	
 	
 	debugPrint("\t%s -> %i\n", "ES_GetStoredTMDSize", ES_GetStoredTMDSize(titleId, &tmdSize));
 	debugPrint("\t%s -> %i\n", "ES_GetStoredTMD", ES_GetStoredTMD(titleId, (signed_blob*)tmdBuffer, tmdSize));
@@ -149,21 +153,23 @@ u32 __load(u16 contentIndex)
 	u8 *data;
 	u8 *decData;
 	fstats *contentStat = (fstats *)memalign( 32, sizeof(fstats) );
+	
+	if (ES_GetTitleID(&titleId) < 0)
+		__rebootWii();
 
 	sprintf(contentPath, "/title/%08x/%08x/content/%08x.app", (u32)(titleId >> 32), (u32)(titleId), contentIndex);
 
 	s32 nandFd = ISFS_Open(contentPath, ISFS_OPEN_READ);
+	__errorCheck(nandFd);
 	printf("\t[*] File descriptor : %i\n", nandFd);
-	ISFS_GetFileStats(nandFd, contentStat);
+	__errorCheck(ISFS_GetFileStats(nandFd, contentStat));
 
 	printf("\t[*] Content %i at %s\n", contentIndex, contentPath);
 	printf("\t[*] Content size : %i\n", contentStat->file_length);
 		
 	data = memalign(32, contentStat->file_length);
-	ISFS_Read(nandFd, data, contentStat->file_length);
-	ISFS_Close(nandFd);
-	
-	__hexdump(data, 100);
+	__errorCheck(ISFS_Read(nandFd, data, contentStat->file_length));
+	__errorCheck(ISFS_Close(nandFd));
 
 	if (data[0] == LZ77_0x11_FLAG)
 	{

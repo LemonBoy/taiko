@@ -67,3 +67,26 @@ void __setupRam()
 	
 	DCFlushRange((void*)0x800000F8, 0xFF);
 }
+
+void __errorCheck(int ret)
+{
+	if (ret >= 0) return;
+	
+	switch (ret)
+	{
+		case -1: case -102: case -1026:
+			printf("\t[*] Forbidden resource"); break;
+		case -4:
+			printf("\t[*] Invalid argument"); break;
+		case -106:
+			printf("\t[*] File not found"); break;
+		case -1017:
+			printf("\t[*] No such IOCTL"); break;
+		case -2016:
+			printf("\t[*] Unaligned data"); break;
+		default:
+			printf("\t[*] Error %i", ret); break;
+	}
+	
+	while (1);
+}

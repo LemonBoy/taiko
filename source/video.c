@@ -34,6 +34,8 @@ static GXRModeObj *rmode = NULL;
 
 void __initializeVideo()
 {
+    VIDEO_Init();
+	
 	rmode = VIDEO_GetPreferredMode(NULL);
 	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 	
@@ -46,7 +48,9 @@ void __initializeVideo()
 	
 	if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 	
-	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	CON_InitEx(rmode, 20,20,rmode->fbWidth,rmode->xfbHeight);
+	//console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	VIDEO_ClearFrameBuffer(rmode, xfb, COLOR_BLACK);
 }	
 
 void __setVideoMode(char region, int forcedMode)

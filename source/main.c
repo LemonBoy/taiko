@@ -47,8 +47,6 @@ int main(int argc, char **argv)
 {	
 	int videoFlags = NO_FORCING;
 	dolEntry entryPoint;
-		
-	VIDEO_Init();
 	
 	__initializeVideo();
 	ISFS_Initialize();
@@ -61,7 +59,7 @@ int main(int argc, char **argv)
 		
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
 	printf("\t[*] Running under IOS%i (rev %i)\n", IOS_GetVersion(), IOS_GetRevision());
-	
+		
 	//loadTaikoConf();
 	//__identifyAsTitle();
 	
