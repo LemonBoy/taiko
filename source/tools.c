@@ -58,21 +58,6 @@ void __hexdump(void *d, int len)
 	}
 }
 
-void debugPrint(const char *text, ...)
-{
-	#ifdef DEBUG
-	char buffer[1024];
-	va_list args;
-	va_start(args, text);
-	vsprintf(buffer, text, args);
-	va_end(args);
-	  
-	printf(buffer);
-	
-	sleep(10);
-	#endif
-}
-
 void __setupRam()
 {
 	printf("\t[*] Setting bus speed\n");

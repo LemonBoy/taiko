@@ -1,9 +1,9 @@
 /*
- * 		taiko 0.1 - A nandloader replacement for Nintendo Wii
+ * 	    taiko 0.1 - A nandloader replacement for Nintendo Wii
  * 
  *      main.c
  * 
- * 		Main module.
+ * 	    Main module.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -29,7 +29,7 @@
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 
-//#include "config.h"
+#include "config.h"
 #include "titles.h"
 #include "video.h"
 #include "tools.h"
@@ -37,9 +37,9 @@
 
 static videoPatch viPatches[] = 
 {
-	{"Force PAL60", FORCE_PAL_60},
-	{"Force PAL50", FORCE_PAL_50},
-	{"Force NTSC", FORCE_NTSC},
+	{"Force PAL60", 	FORCE_PAL_60},
+	{"Force PAL50", 	FORCE_PAL_50},
+	{"Force NTSC", 		FORCE_NTSC},
 	{"Force Composite", FORCE_COMPOSITE}
 };
 

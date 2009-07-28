@@ -50,8 +50,8 @@ void __identifyAsTitle()
 	sprintf(tikPath, "/ticket/%08x/%08x.tik", (u32)(titleId >> 32), (u32)(titleId));
 	tikBuffer = memalign(32, 0x2A4);
 	fd = ISFS_Open(tikPath, ISFS_OPEN_READ);
-	debugPrint("\t[*] %s -> ISFS_Open (tik) -> %s -> \n\t%i\n", __FUNCTION__, tikPath, fd);
-	debugPrint("\t[*] %s -> IOS_Read (tik) -> %i\n", __FUNCTION__, ISFS_Read(fd, tikBuffer, 0x2A4));
+	debugPrint("Tik path %s, file decscriptor %i\n", tikPath, fd);
+	debugPrint("Tik read %i\n", ISFS_Read(fd, tikBuffer, 0x2A4));
 	ISFS_Close(fd);
 
 	debugPrint("\t[*] %s -> ES_GetStoredTMDSize -> %i\n", __FUNCTION__, ES_GetStoredTMDSize(titleId, &tmdSize));
