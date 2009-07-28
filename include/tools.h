@@ -13,5 +13,6 @@ void __rebootWii();
 void __shutdownIos();
 void __hexdump(void *d, int len);
 void __setupRam();
+void __errorCheck(int ret);
 
 #endif
