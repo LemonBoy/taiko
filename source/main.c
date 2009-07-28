@@ -37,19 +37,23 @@
 
 static videoPatch viPatches[] = 
 {
-	{"Force PAL60", 	FORCE_PAL_60},
-	{"Force PAL50", 	FORCE_PAL_50},
-	{"Force NTSC", 		FORCE_NTSC},
+	{"Force PAL60    ", FORCE_PAL_60},
+	{"Force PAL50    ", FORCE_PAL_50},
+	{"Force NTSC     ", FORCE_NTSC},
 	{"Force Composite", FORCE_COMPOSITE}
 };
 
 int main(int argc, char **argv) 
 {	
+	static int iosVersion;
 	int videoFlags = NO_FORCING;
+	u16 cid = 1;
 	dolEntry entryPoint;
 	
 	__initializeVideo();
 	ISFS_Initialize();
+	
+	iosVersion = IOS_GetVersion();
 	
 	printf("\n\n");
 	printf("\ttaiko %i.%i\n", VERSION_MAJOR, VERSION_MINOR);
@@ -58,10 +62,11 @@ int main(int argc, char **argv)
 		__rebootWii();
 		
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
-	printf("\t[*] Running under IOS%i (rev %i)\n", IOS_GetVersion(), IOS_GetRevision());
-		
+	printf("\t[*] Running under IOS%i (rev %i)\n", iosVersion, IOS_GetRevision());
+	
+	IOS_ReloadIOS(36);
+	
 	//loadTaikoConf();
-	//__identifyAsTitle();
 	
 	if (SYS_ResetButtonDown())
 	{	
@@ -79,7 +84,7 @@ int main(int argc, char **argv)
 			
 			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_LEFT) 	{ if (selectedPatch > 0) selectedPatch--; else selectedPatch = viPatchesCount; }
 			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_RIGHT) 	{ if (selectedPatch < viPatchesCount) selectedPatch++; else selectedPatch = 0; }
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_2) 		{ __findMainContent(); }
+			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_2) 		{ printf("\t[*] Main content is %i\n", __findMainContent()); cid = 8; }
 			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_A) 		{ printf("\t[*] Applying patches...\n"); videoFlags |= viPatches[selectedPatch].patchFlag; break; }
 			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_B) 		{ break; }
 		}
@@ -88,7 +93,9 @@ int main(int argc, char **argv)
 		WPAD_Shutdown();
 	}
 	
-	entryPoint = (dolEntry)__load(1);
+	entryPoint = (dolEntry)__load(cid);
+	
+	IOS_ReloadIOS(iosVersion);
 	
 	__setupRam();
 	__setVideoMode(titleId & 0xFF, videoFlags);

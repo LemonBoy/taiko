@@ -24,7 +24,6 @@ typedef void (*dolEntry)(void);
 
 static u64 titleId;
 
-void __identifyAsTitle();
 int __findMainContent();
 u32 __load(u16 contentIndex);
 
