@@ -35,25 +35,26 @@
 
 int __findMainContent()
 {
-	int dolHeading[3]  = { 0x00, 0x00, 0x01 };
-	int lz77Heading[1] = { 0x11 };
+	int dolHeading[3]       = { 0x00, 0x00, 0x01 };
+	int lz77Heading_0x10[1] = { 0x10 };
+	int lz77Heading_0x11[1] = { 0x11 };
 	
 	static u8 tmdBuffer[MAX_SIGNED_TMD_SIZE] ATTRIBUTE_ALIGN(32);
 	u8 contentBuffer[0x3] ATTRIBUTE_ALIGN(32);
 	
 	int x, titleContents, titleBootContent, mainContent;
 	u32 tmdSize;
-	
+
 	if (ES_GetTitleID(&titleId) < 0)
 		__rebootWii();	
 	
 	mainContent = 1;
 	tmdSize = 0;
 	
-	__errorCheck(ES_GetStoredTMDSize(titleId, &tmdSize));
-	__errorCheck(ES_GetStoredTMD(titleId, (signed_blob*)tmdBuffer, tmdSize));
+	__errorCheck(ES_GetStoredTMDSize(titleId, &tmdSize), 1);
+	__errorCheck(ES_GetStoredTMD(titleId, (signed_blob*)tmdBuffer, tmdSize), 1);
 	
-	titleContents = *(u16 *)(tmdBuffer + 0x1DE);
+	titleContents    = *(u16 *)(tmdBuffer + 0x1DE);
 	titleBootContent = *(u16 *)(tmdBuffer + 0x1E0);
 	
 	printf("\t[*] The title has %i contents, we are content %i\n", titleContents, titleBootContent);
@@ -68,16 +69,16 @@ int __findMainContent()
 
 		s32 nandFd = ES_OpenContent(x);
 		
-		__errorCheck(nandFd);
-		__errorCheck(ES_ReadContent(nandFd, contentBuffer, 0x3));
-		__errorCheck(ES_CloseContent(nandFd));
+		__errorCheck(nandFd, 1);
+		__errorCheck(ES_ReadContent(nandFd, contentBuffer, 0x3), 1);
+		__errorCheck(ES_CloseContent(nandFd), 1);
 		
 		if (!(memcmp(contentBuffer, dolHeading, 0x3)))
 		{
 			printf("\t[*] %08x.app seem a valid dol.\n", x);
 			mainContent = x;
 		}
-		else if (!(memcmp(contentBuffer, lz77Heading, 0x1)))
+		else if ((!(memcmp(contentBuffer, lz77Heading_0x10, 0x1))) || (!(memcmp(contentBuffer, lz77Heading_0x11, 0x1))))
 		{
 			printf("\t[*] %08x.app seem a valid dol but lz77 compressed.\n", x);
 			mainContent = x;
@@ -130,9 +131,9 @@ u32 __load(u16 contentIndex)
 		__rebootWii();
 
 	s32 nandFd = ES_OpenContent(contentIndex);
-	__errorCheck(nandFd);
+	__errorCheck(nandFd, 1);
 	u32 dataSize = ES_SeekContent(nandFd, 0, SEEK_END);
-	__errorCheck(dataSize);
+	__errorCheck(dataSize, 1);
 	
 	ES_SeekContent(nandFd, 0, SEEK_SET);
 
@@ -141,17 +142,18 @@ u32 __load(u16 contentIndex)
 		
 	data = memalign(32, dataSize);
 	
-	__errorCheck(ES_ReadContent(nandFd, data, dataSize));
-	__errorCheck(ES_CloseContent(nandFd));
+	__errorCheck(ES_ReadContent(nandFd, data, dataSize), 1);
+	__errorCheck(ES_CloseContent(nandFd), 1);
 
 	if (data[0] == LZ77_0x11_FLAG)
 	{
 		printf("\t[*] LZ77 compressed content...unpacking may take a while...\n");
-		sleep(15);
 		__decompressLZ77_1(data, dataSize, &decData);
 		__hexdump(decData, 100);
 		sleep(25);
+		
 		free(data);
+		
 		return __relocate(decData);
 	}
 

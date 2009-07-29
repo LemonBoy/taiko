@@ -24,6 +24,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <gccore.h>
 
 s32  __IOS_LoadStartupIOS()	{ return 0; }
@@ -68,9 +69,9 @@ void __setupRam()
 	DCFlushRange((void*)0x800000F8, 0xFF);
 }
 
-void __errorCheck(int ret)
+int __errorCheck(int ret, int fatal)
 {
-	if (ret >= 0) return;
+	if (ret >= 0) return 0;
 	
 	switch (ret)
 	{
@@ -88,5 +89,15 @@ void __errorCheck(int ret)
 			printf("\t[*] Error %i", ret); break;
 	}
 	
-	while (1);
+	printf("\n");
+	
+	if (fatal)
+	{
+		printf("\t[*] Rebooting in 10 seconds...");
+		
+		sleep(10);
+		__rebootWii();
+	}
+	
+	return -1;
 }

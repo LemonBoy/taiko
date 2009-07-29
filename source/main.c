@@ -63,10 +63,12 @@ int main(int argc, char **argv)
 		
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
 	printf("\t[*] Running under IOS%i (rev %i)\n", iosVersion, IOS_GetRevision());
+		
+	//__errorCheck(IOS_ReloadIOS(36));
 	
-	IOS_ReloadIOS(36);
+	//__errorCheck(ES_SetUID(titleId));
 	
-	//loadTaikoConf();
+	loadTaikoConf();
 	
 	if (SYS_ResetButtonDown())
 	{	
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
 		
 		while (1)
 		{
-			printf("\x1b[6;0H");
+			printf("\x1b[9;0H");
 			WPAD_ScanPads();
 			
 			printf("\t[*] Press LEFT and RIGHT to choose between patches.\n\t[*] Press A to apply patches and boot, B to boot directly.\n\n");
@@ -94,8 +96,9 @@ int main(int argc, char **argv)
 	}
 	
 	entryPoint = (dolEntry)__load(cid);
+	if ((u32)entryPoint < 0) { printf("\t[*] Invalid entry point..."); sleep(10); __rebootWii(); }
 	
-	IOS_ReloadIOS(iosVersion);
+	//__errorCheck(IOS_ReloadIOS(iosVersion));
 	
 	__setupRam();
 	__setVideoMode(titleId & 0xFF, videoFlags);

@@ -11,9 +11,7 @@ typedef struct _taikoConfig
 	int mainContent;
 } taikoConf;
 
-static taikoConf * taikoConfItems;
-
-#define taikoConfigPath ("/title/00000001/00000002/data/taiko.conf")
+#define taikoConfigPath ("/shared2/taiko.conf")
 
 void loadTaikoConf();
 
