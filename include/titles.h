@@ -7,6 +7,8 @@
 #define maxTextSections 7
 #define maxDataSections 11
 
+#define defaultBootContent 1
+
 typedef struct _dolheader 
 {
 	u32 textoff	[maxTextSections];

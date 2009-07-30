@@ -28,6 +28,9 @@
 #include <malloc.h>
 #include <gccore.h>
 
+#include "lz77.h"
+#include "tools.h"
+
 u32 packBytes(int a, int b, int c, int d)
 {
 	return ((int)a << 24) | ((int)b << 16) | ((int)c << 8) | ((int)d);
@@ -114,4 +117,91 @@ void __decompressLZ77_1(u8 *in, u32 inputLen, u8 **output)
 	}
 	
 	*output = out;
+}
+
+void __decompressLZ77_2(u8 *in, u32 inputLen, u8 **output)
+{
+	int x, y;
+	
+	u8 *out;
+	
+	u32 compressedPos = 0;
+	u32 uncompressedLen = 0;
+	u32 uncompressedPos = 0;
+
+	uncompressedLen = *(u32*)(in) >> 8;
+	
+	if (*(u32*)(in) >> 4 != 1)
+	{
+		__errorCheck(-1337, 1);
+	}
+	
+	out = memalign(32, uncompressedLen);
+	
+	compressedPos += 0x4;
+	
+	while (uncompressedPos < uncompressedLen)
+	{
+		u8 flag = *(u8*)(in + compressedPos);
+		compressedPos += 1;
+		
+		for (x = 0; x < 8; x++)
+		{
+			if (flag & 0x80)
+			{
+				u16 info = *(u16*)(in + compressedPos);
+				compressedPos += 2;
+				u32 num = 3 + ((info >> 12) & 0xF);
+				u32 disp = info & 0xFFF;
+                u32 ptr = uncompressedPos - disp - 1;
+
+				for (y = 0; y < num; y++)
+				{
+					out[uncompressedPos] = out[ptr];
+					uncompressedPos += 1;
+					ptr += 1;
+					if (uncompressedPos >= uncompressedLen)
+						break;
+				}
+			}
+			else
+			{
+				out[uncompressedPos] = in[compressedPos];
+				compressedPos += 1;
+				uncompressedPos += 1;
+			}
+			
+			flag <<= 1;
+			
+			if (uncompressedPos >= uncompressedLen)
+				break;
+		}
+	}
+	
+	*output = out;
+}
+
+int isLZ77compressed(u8 *buffer)
+{
+	if ((buffer[0] == LZ77_0x10_FLAG) || (buffer[0] == LZ77_0x11_FLAG))
+	{
+		return 1;
+	}
+	
+	return 0;
+}
+
+void decompressLZ77content(u8 *buffer, u32 lenght, u8 **output)
+{
+	switch (buffer[0])
+	{
+		case LZ77_0x10_FLAG:
+			printf("\t[*] LZ77 variant 1 compressed content...unpacking may take a while...\n");
+			__decompressLZ77_2(buffer, lenght, output); break;
+		case LZ77_0x11_FLAG:
+			printf("\t[*] LZ77 variant 2 compressed content...unpacking may take a while...\n");
+			__decompressLZ77_1(buffer, lenght, output); break;
+		default:
+			__errorCheck(-1337, 1);
+	}
 }

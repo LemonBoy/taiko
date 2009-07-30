@@ -37,9 +37,9 @@
 
 static videoPatch viPatches[] = 
 {
-	{"Force PAL60    ", FORCE_PAL_60},
-	{"Force PAL50    ", FORCE_PAL_50},
-	{"Force NTSC     ", FORCE_NTSC},
+	{"Force PAL60    ", FORCE_PAL_60   },
+	{"Force PAL50    ", FORCE_PAL_50   },
+	{"Force NTSC     ", FORCE_NTSC     },
 	{"Force Composite", FORCE_COMPOSITE}
 };
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 {	
 	static int iosVersion;
 	int videoFlags = NO_FORCING;
-	u16 cid = 1;
+	u16 cid = defaultBootContent;
 	dolEntry entryPoint;
 	
 	__initializeVideo();
@@ -96,7 +96,12 @@ int main(int argc, char **argv)
 	}
 	
 	entryPoint = (dolEntry)__load(cid);
-	if ((u32)entryPoint < 0) { printf("\t[*] Invalid entry point..."); sleep(10); __rebootWii(); }
+	if ((u32)entryPoint < 0) 
+	{ 
+		printf("\t[*] Invalid entry point..."); 
+		sleep(10); 
+		__rebootWii(); 
+	}
 	
 	//__errorCheck(IOS_ReloadIOS(iosVersion));
 	

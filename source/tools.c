@@ -85,6 +85,8 @@ int __errorCheck(int ret, int fatal)
 			printf("\t[*] No such IOCTL"); break;
 		case -2016:
 			printf("\t[*] Unaligned data"); break;
+		case -1337:
+			printf("\t[*] Decompression error"); break;
 		default:
 			printf("\t[*] Error %i", ret); break;
 	}

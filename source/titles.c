@@ -145,10 +145,9 @@ u32 __load(u16 contentIndex)
 	__errorCheck(ES_ReadContent(nandFd, data, dataSize), 1);
 	__errorCheck(ES_CloseContent(nandFd), 1);
 
-	if (data[0] == LZ77_0x11_FLAG)
+	if (isLZ77compressed(data))
 	{
-		printf("\t[*] LZ77 compressed content...unpacking may take a while...\n");
-		__decompressLZ77_1(data, dataSize, &decData);
+		decompressLZ77content(data, dataSize, &decData);
 		__hexdump(decData, 100);
 		sleep(25);
 		
