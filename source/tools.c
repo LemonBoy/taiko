@@ -87,6 +87,8 @@ int __errorCheck(int ret, int fatal)
 			printf("\t[*] Unaligned data"); break;
 		case -1337:
 			printf("\t[*] Decompression error"); break;
+		case -2000:
+			printf("\t[*] Wrong application entry point"); break;
 		default:
 			printf("\t[*] Error %i", ret); break;
 	}

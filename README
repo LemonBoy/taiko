@@ -4,6 +4,7 @@ A nandloader replacement for wii channels developed by The Lemon Man using 100% 
 Kudos to :
 DevkitPPC & libOGC team
 PuyoPopTools project for LZ77 0x11 decompression routine
+stev418 for many many tests and for pointing out the reverse order in the compression :D
 megazig for giving solutions for anything :D
 #hackerchannel folks for anything else
 

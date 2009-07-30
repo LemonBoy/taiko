@@ -1,9 +1,9 @@
 /*
- * 	    taiko 0.1 - A nandloader replacement for Nintendo Wii
+ *      taiko 0.1 - A nandloader replacement for Nintendo Wii
  * 
  *      main.c
  * 
- * 	    Main module.
+ *      Main module.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -96,19 +96,18 @@ int main(int argc, char **argv)
 	}
 	
 	entryPoint = (dolEntry)__load(cid);
+	
 	if ((u32)entryPoint < 0) 
 	{ 
-		printf("\t[*] Invalid entry point..."); 
-		sleep(10); 
-		__rebootWii(); 
+		__errorCheck(-2000, 1);
 	}
 	
 	//__errorCheck(IOS_ReloadIOS(iosVersion));
 	
+	printf("\t[*] Setting video mode as %c.\n", (char)(titleId & 0xFF));
+	
 	__setupRam();
 	__setVideoMode(titleId & 0xFF, videoFlags);
-	
-	printf("\t[*] Video mode is ok, set as %c.\n", (char)(titleId & 0xFF));
 	
 	ISFS_Deinitialize();
 	__shutdownIos();
