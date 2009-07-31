@@ -1,9 +1,9 @@
 /*
- * 		taiko 0.1 - A nandloader replacement for Nintendo Wii
+ * 	    taiko 0.1 - A nandloader replacement for Nintendo Wii
  * 
  *      tools.c
  * 
- * 		Module holding all the tool functions.
+ * 	    Module holding all the tool functions.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -83,6 +83,8 @@ int __errorCheck(int ret, int fatal)
 			printf("\t[*] File not found"); break;
 		case -1017:
 			printf("\t[*] No such IOCTL"); break;
+		case -1234:
+			printf("\t[*] Cannot retrieve title id"); break;	
 		case -2016:
 			printf("\t[*] Unaligned data"); break;
 		case -1337:

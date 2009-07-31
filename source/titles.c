@@ -1,9 +1,9 @@
 /*
- * 		taiko 0.1 - A nandloader replacement for Nintendo Wii
+ * 	    taiko 0.1 - A nandloader replacement for Nintendo Wii
  * 
  *      titles.c
  * 
- * 		Class for dealing with titles and their contents.
+ *      Class for dealing with titles and their contents.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -31,13 +31,21 @@
 #include <gccore.h>
 
 #include "titles.h"
+#include "patch.h"
 #include "tools.h"
+
+#define DEBUG_TITLES
+
+#ifdef DEBUG_TITLES
+#define __dprintf(fmt, args...) \
+	fprintf(stderr, "\t[+] %s:%d->" fmt, __FUNCTION__, __LINE__, ##args)
+#else
+#define __dprintf(fmt, args...)
+#endif
 
 int __findMainContent()
 {
 	int dolHeading[3]       = { 0x00, 0x00, 0x01 };
-	int lz77Heading_0x10[1] = { 0x10 };
-	int lz77Heading_0x11[1] = { 0x11 };
 	
 	static u8 tmdBuffer[MAX_SIGNED_TMD_SIZE] ATTRIBUTE_ALIGN(32);
 	u8 contentBuffer[0x3] ATTRIBUTE_ALIGN(32);
@@ -54,8 +62,8 @@ int __findMainContent()
 	__errorCheck(ES_GetStoredTMDSize(titleId, &tmdSize), 1);
 	__errorCheck(ES_GetStoredTMD(titleId, (signed_blob*)tmdBuffer, tmdSize), 1);
 	
-	titleContents    = *(u16 *)(tmdBuffer + 0x1DE);
-	titleBootContent = *(u16 *)(tmdBuffer + 0x1E0);
+	titleContents    = MAX_NUM_TMD_CONTENTS;//*(u16 *)(tmdBuffer + 0x1DE);
+	titleBootContent = 7;                   //*(u16 *)(tmdBuffer + 0x1E0);
 	
 	printf("\t[*] The title has %i contents, we are content %i\n", titleContents, titleBootContent);
 	
@@ -78,7 +86,7 @@ int __findMainContent()
 			printf("\t[*] %08x.app seem a valid dol.\n", x);
 			mainContent = x;
 		}
-		else if ((!(memcmp(contentBuffer, lz77Heading_0x10, 0x1))) || (!(memcmp(contentBuffer, lz77Heading_0x11, 0x1))))
+		else if (isLZ77compressed(contentBuffer))
 		{
 			printf("\t[*] %08x.app seem a valid dol but lz77 compressed.\n", x);
 			mainContent = x;
@@ -96,7 +104,7 @@ u32 __relocate(u8 *dolBuffer)
 {
 	u32 x;
 	static dolheader *dol __attribute__((aligned(32)));
-	dol = (dolheader *)dolBuffer;
+	dol = (dolheader *)dolBuffer; 
 	
 	printf("\t[*] Clear BSS\n");
 	
@@ -127,12 +135,20 @@ u32 __load(u16 contentIndex)
 	u8 *data;
 	u8 *decData;
 	
+	u32 dataSize;
+	u32 decDataSize;
+	
 	if (ES_GetTitleID(&titleId) < 0)
-		__rebootWii();
+		__errorCheck(-1234, 1);
+		
+	__dprintf("contentIndex->%i\n", contentIndex);
+	
+	dataSize = 0;
+	decDataSize = 0;
 
 	s32 nandFd = ES_OpenContent(contentIndex);
 	__errorCheck(nandFd, 1);
-	u32 dataSize = ES_SeekContent(nandFd, 0, SEEK_END);
+	dataSize = ES_SeekContent(nandFd, 0, SEEK_END);
 	__errorCheck(dataSize, 1);
 	
 	ES_SeekContent(nandFd, 0, SEEK_SET);
@@ -144,18 +160,33 @@ u32 __load(u16 contentIndex)
 	
 	__errorCheck(ES_ReadContent(nandFd, data, dataSize), 1);
 	__errorCheck(ES_CloseContent(nandFd), 1);
+	
+	int compressed = isLZ77compressed(data);
 
-	if (isLZ77compressed(data))
+	if (compressed)
 	{
-		decompressLZ77content(data, dataSize, &decData);
-		__hexdump(decData, 100);
-		sleep(25);
-		
+		decompressLZ77content(data, dataSize, &decData, decDataSize);	
 		free(data);
-		
-		return __relocate(decData);
 	}
-
-	return __relocate(data);
+	
+	/*__dprintf("Now testing the patch system, pattern size %i\n", sizeof(pattern_002_error));
+	sleep(10);
+	
+	u32 error002patch = searchPattern(0x80000000, dataSize, pattern_002_error, sizeof(pattern_002_error));
+	while (error002patch > 0)
+	{
+		u32 error002patch = searchPattern(error002patch, dataSize, pattern_002_error, sizeof(pattern_002_error));
+	}
+	 
+	if (error002patch > 0)
+		patchAddress(error002patch, patch_002_error, sizeof(patch_002_error));
+	*/
+	
+	fix002error();
+	
+	if (compressed)
+		return __relocate(decData);
+	else
+		return __relocate(data);
 	
 }

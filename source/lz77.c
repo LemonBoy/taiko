@@ -1,9 +1,9 @@
 /*
- * 		taiko 0.1 - A nandloader replacement for Nintendo Wii
+ *      taiko 0.1 - A nandloader replacement for Nintendo Wii
  * 
  *      lz77.c
  * 
- * 		Class for lz77 decompression routines.
+ *      Class for lz77 decompression routines.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -33,10 +33,10 @@
 
 u32 packBytes(int a, int b, int c, int d)
 {
-	return ((int)d << 24) | ((int)c << 16) | ((int)b << 8) | ((int)a);
+	return (d << 24) | (c << 16) | (b << 8) | (a);
 }
 
-void __decompressLZ77_10(u8 *in, u32 inputLen, u8 **output)
+void __decompressLZ77_11(u8 *in, u32 inputLen, u8 **output, u32 outputLen)
 {
 	int x, y;
 	
@@ -117,9 +117,10 @@ void __decompressLZ77_10(u8 *in, u32 inputLen, u8 **output)
 	}
 	
 	*output = out;
+	outputLen = decompressedSize;
 }
 
-void __decompressLZ77_11(u8 *in, u32 inputLen, u8 **output)
+void __decompressLZ77_10(u8 *in, u32 inputLen, u8 **output, u32 outputLen)
 {	
 	int x, y;
 	
@@ -182,6 +183,7 @@ void __decompressLZ77_11(u8 *in, u32 inputLen, u8 **output)
 	}
 
     *output = out;
+	outputLen = decompressedSize;
 }
 
 int isLZ77compressed(u8 *buffer)
@@ -194,16 +196,16 @@ int isLZ77compressed(u8 *buffer)
 	return 0;
 }
 
-void decompressLZ77content(u8 *buffer, u32 lenght, u8 **output)
+void decompressLZ77content(u8 *buffer, u32 lenght, u8 **output, u32 outputLen)
 {
 	switch (buffer[0])
 	{
 		case LZ77_0x10_FLAG:
 			printf("\t[*] LZ77 variant 0x10 compressed content...unpacking may take a while...\n");
-			__decompressLZ77_10(buffer, lenght, output); break;
+			__decompressLZ77_10(buffer, lenght, output, outputLen); break;
 		case LZ77_0x11_FLAG:
 			printf("\t[*] LZ77 variant 0x11 compressed content...unpacking may take a while...\n");
-			__decompressLZ77_11(buffer, lenght, output); break;
+			__decompressLZ77_11(buffer, lenght, output, outputLen); break;
 		default:
 			__errorCheck(-1337, 1);
 	}

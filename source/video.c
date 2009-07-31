@@ -48,8 +48,8 @@ void __initializeVideo()
 	
 	if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 	
-	CON_InitEx(rmode, 20,20,rmode->fbWidth,rmode->xfbHeight);
-	//console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	CON_InitEx(rmode, 20, 20, rmode->fbWidth ,rmode->xfbHeight);
+
 	VIDEO_ClearFrameBuffer(rmode, xfb, COLOR_BLACK);
 }	
 

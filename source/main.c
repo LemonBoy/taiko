@@ -45,7 +45,6 @@ static videoPatch viPatches[] =
 
 int main(int argc, char **argv) 
 {	
-	static int iosVersion;
 	int videoFlags = NO_FORCING;
 	u16 cid = defaultBootContent;
 	dolEntry entryPoint;
@@ -53,20 +52,18 @@ int main(int argc, char **argv)
 	__initializeVideo();
 	ISFS_Initialize();
 	
-	iosVersion = IOS_GetVersion();
-	
 	printf("\n\n");
 	printf("\ttaiko %i.%i\n", VERSION_MAJOR, VERSION_MINOR);
 	
 	if (ES_GetTitleID(&titleId) < 0)
-		__rebootWii();
+		__errorCheck(-1234, 1);
+		
+	//__errorCheck(IOS_ReloadIOS(36), 1);	
 		
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
-	printf("\t[*] Running under IOS%i (rev %i)\n", iosVersion, IOS_GetRevision());
-		
-	//__errorCheck(IOS_ReloadIOS(36));
+	printf("\t[*] Running under IOS%i (rev %i)\n", IOS_GetVersion(), IOS_GetRevision());
 	
-	//__errorCheck(ES_SetUID(titleId));
+	//__errorCheck(ES_SetUID(titleId), 1);
 	
 	loadTaikoConf();
 	
