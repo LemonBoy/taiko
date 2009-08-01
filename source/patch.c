@@ -30,6 +30,8 @@
 
 #include "tools.h"
 
+#define _CHECK_PATCH
+
 #define DEBUG_PATCH
 
 #ifdef DEBUG_PATCH
@@ -41,12 +43,7 @@
 
 void fix002error()
 {
-	__dprintf("Current ios version : %#x\n",   *(u32*)0x80003140);
-	__dprintf("Current ios revision : %#x\n",  *(u32*)0x80003144);
-	__dprintf("Expected ios version : %#x\n",  *(u32*)0x80003188);
-	__dprintf("Expected ios revision : %#x\n", *(u32*)0x8000318A);
-	
-	*(u32*)0x80003188 = *(u32*)0x80003140;
+	write32(0x80003188, read32(0x80003140));
 }
 
 u32 searchPattern(u32 address, u32 len, u32 *pattern, u32 patternLen)
@@ -63,7 +60,7 @@ u32 searchPattern(u32 address, u32 len, u32 *pattern, u32 patternLen)
 
 	scanEndAddress = address + len;
 	
-	for (currentAddress = 0; currentAddress < scanEndAddress; currentAddress += 4)
+	for (currentAddress = 0; currentAddress < scanEndAddress; currentAddress++)
 	{
 		if (!memcmp(memoryBase + currentAddress, pattern, patternLen))
 		{
@@ -82,6 +79,11 @@ void patchAddress(u32 address, u32 *patch, u32 patchLen)
 	void *memoryBase = (void *)address;
 	
 	memcpy(memoryBase, patch, patchLen);
+#ifdef _CHECK_PATCH
+	if (!memcmp(memoryBase, patch, patchLen))
+		__dprintf("Patch applied at %#x!\n", address);
+	else
+		__dprintf("Failed to patch %#x!\n", address);
+#endif
 	
-	__dprintf("Patch applied at %#x!\n", address);
 }

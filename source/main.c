@@ -57,35 +57,37 @@ int main(int argc, char **argv)
 	
 	if (ES_GetTitleID(&titleId) < 0)
 		__errorCheck(-1234, 1);
-		
-	//__errorCheck(IOS_ReloadIOS(36), 1);	
-		
+
+	printf("\t[*] Free ram : %i kb", checkAvailableMem() / 1024);
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
 	printf("\t[*] Running under IOS%i (rev %i)\n", IOS_GetVersion(), IOS_GetRevision());
-	
-	//__errorCheck(ES_SetUID(titleId), 1);
-	
+
 	loadTaikoConf();
-	
+
 	if (SYS_ResetButtonDown())
 	{	
 		int selectedPatch = 0;
 		
 		WPAD_Init();
+		PAD_Init();
 		
 		while (1)
 		{
-			printf("\x1b[9;0H");
+			printf("\x1b[7;0H");
 			WPAD_ScanPads();
+			PAD_ScanPads();
 			
 			printf("\t[*] Press LEFT and RIGHT to choose between patches.\n\t[*] Press A to apply patches and boot, B to boot directly.\n\n");
 			printf("\t[*] Selected patch << %s >>\n", viPatches[selectedPatch].name);
 			
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_LEFT) 	{ if (selectedPatch > 0) selectedPatch--; else selectedPatch = viPatchesCount; }
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_RIGHT) 	{ if (selectedPatch < viPatchesCount) selectedPatch++; else selectedPatch = 0; }
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_2) 		{ printf("\t[*] Main content is %i\n", __findMainContent()); cid = 8; }
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_A) 		{ printf("\t[*] Applying patches...\n"); videoFlags |= viPatches[selectedPatch].patchFlag; break; }
-			if (WPAD_ButtonsDown(0) & WPAD_BUTTON_B) 		{ break; }
+			if ((WPAD_ButtonsDown(0) & WPAD_BUTTON_LEFT)  || (PAD_ButtonsDown(0) & PAD_BUTTON_LEFT)) 
+				{ if (selectedPatch > 0) selectedPatch--; else selectedPatch = viPatchesCount; }
+			if ((WPAD_ButtonsDown(0) & WPAD_BUTTON_RIGHT) || (PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT))
+			 	{ if (selectedPatch < viPatchesCount) selectedPatch++; else selectedPatch = 0; }
+			if ((WPAD_ButtonsDown(0) & WPAD_BUTTON_A)     || (PAD_ButtonsDown(0) & PAD_BUTTON_A))
+				{ printf("\t[*] Applying patches...\n"); videoFlags |= viPatches[selectedPatch].patchFlag; break; }
+			if ((WPAD_ButtonsDown(0) & WPAD_BUTTON_B)     || (PAD_ButtonsDown(0) & PAD_BUTTON_B))
+				{ break; }
 		}
 		
 		WPAD_Flush(0);
@@ -99,7 +101,8 @@ int main(int argc, char **argv)
 		__errorCheck(-2000, 1);
 	}
 	
-	//__errorCheck(IOS_ReloadIOS(iosVersion));
+	addProfile(titleId, videoFlags, cid);
+	saveProfiles();
 	
 	printf("\t[*] Setting video mode as %c.\n", (char)(titleId & 0xFF));
 	

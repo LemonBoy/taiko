@@ -5,8 +5,7 @@
 
 typedef struct _taikoConfig
 {
-	u32 titleHigh;
-	u32 titleLow;
+	u64 titleId;
 	int videoFlag;
 	int mainContent;
 } taikoConf;
@@ -14,5 +13,8 @@ typedef struct _taikoConfig
 #define taikoConfigPath ("/shared2/taiko.conf")
 
 void loadTaikoConf();
+void saveProfiles();
+
+void addProfile(u64 titleid, int videoFlag, int mainContent);
 
 #endif

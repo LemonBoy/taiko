@@ -43,7 +43,7 @@
 #endif
 
 static int configLoaded = 0;
-static taikoConf * taikoConfItems;
+static taikoConf * taikoConfItems ATTRIBUTE_ALIGN(32);
 static int foundProfiles = 0;
 
 void loadTaikoConf()
@@ -73,7 +73,7 @@ void loadTaikoConf()
 	savedProfiles = configStat->file_length / sizeof(taikoConf);
 	taikoConfItems = calloc(savedProfiles, sizeof(taikoConf));
 	
-	printf("\t[*] Found %i profiles\n", savedProfiles); sleep(10);
+	printf("\t[*] Found %i profiles\n", savedProfiles);
 	
 	for (currentProfile = 0; currentProfile < savedProfiles; currentProfile++)
 	{
@@ -88,22 +88,91 @@ void loadTaikoConf()
 	__errorCheck(ISFS_Close(tConf), 1);
 }
 
-void searchProfile(u32 titleHigh, u32 titleLow, taikoConf *foundProfile)
+void searchProfile(u64 titleid, int index)
 {
 	int currentProfile;
 	
 	if ((!configLoaded) || (!foundProfiles))
-		foundProfile = NULL;
+	{
+		index = -1;
+	}
 	
 	for (currentProfile = 0; currentProfile < foundProfiles; currentProfile++)
 	{
-		if ((taikoConfItems[currentProfile].titleHigh = titleHigh) &&
-			(taikoConfItems[currentProfile].titleHigh = titleLow))
+		if (taikoConfItems[currentProfile].titleId == titleid)
 		{
-			foundProfile = &taikoConfItems[currentProfile];
-			__dprintf("Found a valid profile\n");
+			index = currentProfile;
+			__dprintf("Found the profile for %16llx\n", titleid);
 		}
 	}	
 	
-	foundProfile = NULL;
+	index = -1;
+}
+
+void addProfile(u64 titleid, int videoFlag, int mainContent)
+{
+	int index;
+	
+	index = -1;
+	
+	if (!configLoaded)
+	{
+		return;
+	}
+	
+	searchProfile(titleid, index);
+	
+	if (index < 0)
+	{
+		__dprintf("Profile for %16llx not found\n", titleid);
+		
+		foundProfiles++;
+
+		taikoConfItems = (taikoConf *)realloc(taikoConfItems, sizeof(taikoConf) * foundProfiles);
+		memset(&(taikoConfItems[foundProfiles]), 0, sizeof(taikoConf));
+		
+		taikoConfItems[foundProfiles].titleId = titleid;
+		taikoConfItems[foundProfiles].videoFlag = videoFlag;
+		taikoConfItems[foundProfiles].mainContent = mainContent;
+	} else {
+		__dprintf("Profile for %16llx found\n", titleid);
+		
+		taikoConfItems[index].videoFlag = videoFlag;
+		taikoConfItems[index].mainContent = mainContent;
+	}	
+	
+	__dprintf("There are %i profiles now\n", foundProfiles);
+
+}
+
+void saveProfiles()
+{
+	s32 tConf;
+	u8* profileBuf;
+	
+	if ((!configLoaded) || (!foundProfiles))
+	{
+		return;
+	}
+	
+	__dprintf("Writing back %i profiles\n", foundProfiles);
+	
+	tConf = ISFS_Open(taikoConfigPath, ISFS_OPEN_RW);
+	
+	__errorCheck(tConf, 1);
+
+	profileBuf = memalign(32, sizeof(taikoConf));
+	
+	while (foundProfiles > 0)
+	{
+		memcpy(profileBuf, (u8 *)&taikoConfItems[foundProfiles], sizeof(taikoConf));
+		__errorCheck(ISFS_Write(tConf, profileBuf, sizeof(taikoConf)), 1);
+		foundProfiles--;
+	}
+	
+	__errorCheck(ISFS_Close(tConf), 1);
+	
+	configLoaded = 0;
+	
+	sleep(10);
 }

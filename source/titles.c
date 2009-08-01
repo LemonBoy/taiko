@@ -169,18 +169,12 @@ u32 __load(u16 contentIndex)
 		free(data);
 	}
 	
-	/*__dprintf("Now testing the patch system, pattern size %i\n", sizeof(pattern_002_error));
-	sleep(10);
+	__dprintf("Now testing the patch system, pattern size %i\n", sizeof(pattern_002_error));
 	
 	u32 error002patch = searchPattern(0x80000000, dataSize, pattern_002_error, sizeof(pattern_002_error));
-	while (error002patch > 0)
-	{
-		u32 error002patch = searchPattern(error002patch, dataSize, pattern_002_error, sizeof(pattern_002_error));
-	}
-	 
+ 
 	if (error002patch > 0)
 		patchAddress(error002patch, patch_002_error, sizeof(patch_002_error));
-	*/
 	
 	fix002error();
 	

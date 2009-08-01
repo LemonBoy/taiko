@@ -40,7 +40,7 @@ void __decompressLZ77_11(u8 *in, u32 inputLen, u8 **output, u32 outputLen)
 {
 	int x, y;
 	
-	u8 *out;
+	u8 *out = (u8 *)getLowestMem2Address();
 	
 	u32 compressedPos 	= 0x4;
 	u32 decompressedPos	= 0x0;
@@ -124,7 +124,7 @@ void __decompressLZ77_10(u8 *in, u32 inputLen, u8 **output, u32 outputLen)
 {	
 	int x, y;
 	
-	u8 *out;
+	u8 *out = (u8 *)getLowestMem2Address();
 	
 	u32 compressedPos = 0;
 	u32 decompressedSize = 0x4;

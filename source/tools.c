@@ -25,12 +25,26 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <malloc.h>
 #include <gccore.h>
 
 s32  __IOS_LoadStartupIOS()	{ return 0; }
 void __clearConsole() 		{ printf("\x1b[2J"); }
 void __rebootWii() 			{ SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0); }
 void __shutdownIos()		{ SYS_ResetSystem(SYS_SHUTDOWN, 0, 0); }
+
+u32 getLowestMem2Address()  { return (u32) SYS_GetArena2Lo(); }
+
+u32 checkAvailableMem()
+{
+	u32 mem1total = (u32)SYS_GetArena1Hi();
+	u32 mem2total = (u32)SYS_GetArena2Hi();
+	
+	u32 mem1used = (u32)SYS_GetArena1Lo();
+	u32 mem2used = (u32)SYS_GetArena2Lo();
+	
+	return mem1total - mem1used + mem2total - mem2used;
+}
 
 char ascii(char s)
 {
