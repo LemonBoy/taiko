@@ -1,8 +1,0 @@
-0000000000000000000000000000000000000000 2d6f9eea9222c64412bbddf7345e1ac132df3099 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248794375 +0200	clone: from git@github.com:LemonBoy/taiko.git
-2d6f9eea9222c64412bbddf7345e1ac132df3099 77e8fdc20a689199ea23d2fb817d444f420c8206 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248794439 +0200	commit: Forgot to update tools.h
-77e8fdc20a689199ea23d2fb817d444f420c8206 59b33b127216dd2f6d39382c77364d69886e3dcb Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248809784 +0200	commit: Reverted to ES calls
-59b33b127216dd2f6d39382c77364d69886e3dcb 8debcbf6addfe95242fe7dc28f839fe5d1f7d6c6 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248875539 +0200	commit: Now config works
-8debcbf6addfe95242fe7dc28f839fe5d1f7d6c6 792caaf58ef6388bff4e7f1979498d374c3deae8 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248947513 +0200	commit: Added lz77 0x10 decompression, adjusted the lz77 class
-792caaf58ef6388bff4e7f1979498d374c3deae8 80a634bd559f24ba7d6ef98d92f9edf701f4f6dd Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1248960705 +0200	commit: Fixed the decompressors to use the reverse byte order, added lz77 0x10 decompressor
-80a634bd559f24ba7d6ef98d92f9edf701f4f6dd bf9ee18bd2e77fb89e78aa216b510377b1cf6883 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1249052387 +0200	commit: Added memory patcher, 002 error fix added
-bf9ee18bd2e77fb89e78aa216b510377b1cf6883 a0839dece5cf2a5270b1ab9347dec8ad71e80212 Giuseppe (LemonBoy) <segnalazionidalweb@gmail.com> 1249141015 +0200	commit: Fixed patch engine, configuration now should work
