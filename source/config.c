@@ -3,7 +3,7 @@
  * 
  *      config.c
  * 
- * 	    Module to handle the profile database.
+ * 	    Module to handle the profile database stored in /shared2/taiko.conf.
  *      
  *      Copyright 2009 The Lemon Man <giuseppe@FullMetal>
  *      
@@ -42,71 +42,62 @@
 #define __dprintf(fmt, args...)
 #endif
 
-static int configLoaded = 0;
-static taikoConf * taikoConfItems ATTRIBUTE_ALIGN(32);
-static int foundProfiles = 0;
+static bool configLoaded = false;
+static s32 configFd = 0;
 
 void loadTaikoConf()
 {
-	s32 tConf;
-	fstats *configStat = (fstats *)memalign( 32, sizeof(fstats) );
-	
-	int savedProfiles = 0, currentProfile = 0;
-	u8 *itemBuf = memalign(32, sizeof(taikoConf));	
-
-	tConf = ISFS_Open(taikoConfigPath, ISFS_OPEN_RW);
+	configFd = ISFS_Open(taikoConfigPath, ISFS_OPEN_RW);
 		
-	if ((tConf < 0) && (tConf == -106))
+	if ((configFd < 0) && (configFd == -106))
 	{
 		__errorCheck(ISFS_CreateFile(taikoConfigPath, 0, ISFS_OPEN_RW, ISFS_OPEN_RW, ISFS_OPEN_RW), 0);
-		tConf = ISFS_Open(taikoConfigPath, ISFS_OPEN_RW);
+		configFd = ISFS_Open(taikoConfigPath, ISFS_OPEN_RW);
 	}
 	
-	if (__errorCheck(tConf, 0) < 0)
+	if (__errorCheck(configFd, 0) < 0)
 	{
 		printf("\t[*] Cannot open configuration file\n");
 		return;
 	}
 	
-	__errorCheck(ISFS_GetFileStats(tConf, configStat), 1);
+	configLoaded = true;
+}
+	
+taikoConf *getProfile(u64 titleId)
+{
+	int currentProfile;
+	int savedProfiles = 0;
+	u8 *itemBuf = memalign( 32, sizeof(taikoConf) );
+	fstats *configStat = (fstats *)memalign( 32, sizeof(fstats) );
+	
+	if (!configLoaded)
+	{
+		return NULL;
+	}
+	
+	__errorCheck(ISFS_GetFileStats(configFd, configStat), 1);
 
 	savedProfiles = configStat->file_length / sizeof(taikoConf);
-	taikoConfItems = calloc(savedProfiles, sizeof(taikoConf));
+	
+	free(configStat);
 	
 	printf("\t[*] Found %i profiles\n", savedProfiles);
 	
 	for (currentProfile = 0; currentProfile < savedProfiles; currentProfile++)
 	{
-		__errorCheck(ISFS_Read(tConf, itemBuf, sizeof(taikoConf)), 1);
-		memcpy(taikoConfItems + currentProfile * sizeof(taikoConf), itemBuf, sizeof(taikoConf));
-		
-		foundProfiles++;
-	}
-	
-	configLoaded = 1;
-	
-	__errorCheck(ISFS_Close(tConf), 1);
-}
-
-void searchProfile(u64 titleid, int index)
-{
-	int currentProfile;
-	
-	if ((!configLoaded) || (!foundProfiles))
-	{
-		index = -1;
-	}
-	
-	for (currentProfile = 0; currentProfile < foundProfiles; currentProfile++)
-	{
-		if (taikoConfItems[currentProfile].titleId == titleid)
+		__errorCheck(ISFS_Read(configFd, itemBuf, sizeof(taikoConf) - sizeof(int)), 1);
+		taikoConf *c = (taikoConf *)itemBuf;
+		if (c->titleId == titleId)
 		{
-			index = currentProfile;
-			__dprintf("Found the profile for %16llx\n", titleid);
+			printf ("\t[*] Profile found\n");
+			return (taikoConf*)(itemBuf);
 		}
-	}	
+	}
 	
-	index = -1;
+	free(itemBuf);
+	
+	return NULL;
 }
 
 void addProfile(u64 titleid, int videoFlag, int mainContent)
@@ -165,8 +156,9 @@ void saveProfiles()
 	
 	while (foundProfiles > 0)
 	{
-		memcpy(profileBuf, (u8 *)&taikoConfItems[foundProfiles], sizeof(taikoConf));
+		memcpy(profileBuf, &taikoConfItems[foundProfiles], sizeof(taikoConf));
 		__errorCheck(ISFS_Write(tConf, profileBuf, sizeof(taikoConf)), 1);
+		
 		foundProfiles--;
 	}
 	
@@ -174,5 +166,6 @@ void saveProfiles()
 	
 	configLoaded = 0;
 	
-	sleep(10);
+	free(profileBuf);
+	free(taikoConfItems);
 }

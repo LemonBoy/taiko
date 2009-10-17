@@ -26,12 +26,18 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <malloc.h>
+#include <time.h>
 #include <gccore.h>
+#include <ogc/lwp_watchdog.h>
+
+
+#include "tools.h"
 
 s32  __IOS_LoadStartupIOS()	{ return 0; }
 void __clearConsole() 		{ printf("\x1b[2J"); }
 void __rebootWii() 			{ SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0); }
 void __shutdownIos()		{ SYS_ResetSystem(SYS_SHUTDOWN, 0, 0); }
+void __setTime()			{ settime(secs_to_ticks(time(NULL) - 946684800)); }
 
 u32 getLowestMem2Address()  { return (u32) SYS_GetArena2Lo(); }
 
@@ -60,25 +66,25 @@ void __hexdump(void *d, int len)
 	data = (u8*)d;
 	for (off=0; off<len; off += 16) 
 	{
-		printf("\t%08x ", off);
+		printf("%08x ", off);
 		for(i=0; i<16; i++)
-			if((i+off)>=len) printf("\t   ");
-			else printf("\t%02x ",data[off+i]);
+			if((i+off)>=len) printf("   ");
+			else printf("%02x ",data[off+i]);
 		
-		printf("\t ");
+		printf(" ");
 		for(i=0; i<16; i++)
-			if((i+off)>=len) printf("\t ");
-			else printf("\t%c",ascii(data[off+i]));
-	printf("\t\n");
+			if((i+off)>=len) printf(" ");
+			else printf("%c",ascii(data[off+i]));
+	printf("\n");
 	}
 }
 
 void __setupRam()
 {
 	printf("\t[*] Setting bus speed\n");
-	*(u32*)0x800000F8 = 0x0E7BE2C0;
+	write32(0x800000F8, 0x0E7BE2C0);
 	printf("\t[*] Setting cpu speed\n");
-	*(u32*)0x800000FC = 0x2B73A840;
+	write32(0x800000FC, 0x2B73A840);
 	
 	DCFlushRange((void*)0x800000F8, 0xFF);
 }

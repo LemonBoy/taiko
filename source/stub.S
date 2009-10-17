@@ -1,5 +1,5 @@
 # stub code by Comex
-#include "asm.h"
+#include "../include/asm.h"
 
 	.text
 	.section .stub

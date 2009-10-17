@@ -127,6 +127,8 @@ u32 __relocate(u8 *dolBuffer)
 	
 	printf("\t[*] Entry point at : 0x%x\n", dol->entry);
 	
+	free(dolBuffer);
+	
 	return dol->entry;
 }
 

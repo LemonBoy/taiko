@@ -10,6 +10,9 @@
 #define read32(address) (*(u32*)address)
 #define write32(address, value) (*(u32*)address = (u32)value)
 
+#define read64(address) (*(u64*)address)
+#define write64(address, value) (*(u64*)address = (u64)value)
+
 void __clearConsole();
 void __rebootWii();
 void __shutdownIos();

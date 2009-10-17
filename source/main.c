@@ -45,6 +45,7 @@ static videoPatch viPatches[] =
 
 int main(int argc, char **argv) 
 {	
+	int saveProfile = 0;
 	int videoFlags = NO_FORCING;
 	u16 cid = defaultBootContent;
 	dolEntry entryPoint;
@@ -58,11 +59,13 @@ int main(int argc, char **argv)
 	if (ES_GetTitleID(&titleId) < 0)
 		__errorCheck(-1234, 1);
 
-	printf("\t[*] Free ram : %i kb", checkAvailableMem() / 1024);
+	printf("\t[*] Free ram : %i kb\n", checkAvailableMem() / 1024);
 	printf("\t[*] Booting : %08x-%08x\n", (u32)(titleId >> 32), (u32)(titleId));
 	printf("\t[*] Running under IOS%i (rev %i)\n", IOS_GetVersion(), IOS_GetRevision());
 
 	loadTaikoConf();
+	if (!getProfileValues(titleId, &videoFlags, &cid))
+		saveProfile = 1;
 
 	if (SYS_ResetButtonDown())
 	{	
@@ -94,15 +97,18 @@ int main(int argc, char **argv)
 		WPAD_Shutdown();
 	}
 	
+	if (saveProfile)
+	{
+		addProfile(titleId, videoFlags, cid);
+		saveProfiles();
+	}
+	
 	entryPoint = (dolEntry)__load(cid);
 	
 	if ((u32)entryPoint < 0) 
 	{ 
 		__errorCheck(-2000, 1);
 	}
-	
-	addProfile(titleId, videoFlags, cid);
-	saveProfiles();
 	
 	printf("\t[*] Setting video mode as %c.\n", (char)(titleId & 0xFF));
 	
